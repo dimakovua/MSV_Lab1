@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -159,18 +161,18 @@ class MainTest {
         BufferedWriter writer = new BufferedWriter(new FileWriter("/Users/dmytrokovalenko/Documents/TestingLab1/input.txt"));
         writer.write(input);
         writer.close();
-
         // Запустити головний метод
         Main.main(new String[]{});
-
         // Прочитати вихідні дані з файлу
         List<String> actualOutput = Files.readAllLines(Path.of("/Users/dmytrokovalenko/Documents/TestingLab1/output.txt"));
-
-        // Перевірити, що вихідні дані містять унікальні слова, відсортовані за зростанням довжини
-        assertThat(actualOutput, Matchers.contains(expectedOutput.toArray()));
-
+        assertThat(actualOutput,
+                allOf(
+                        contains(expectedOutput.toArray()),
+                        containsInRelativeOrder(expectedOutput.toArray())
+                )
+        );
         // Перевірити, що вихідні дані не є порожніми
-        assertThat(actualOutput, Matchers.not(empty()));
+        assertThat(actualOutput, not(empty()));
 
         // Перевірити, що кількість слів у вихідних даних відповідає очікуваному результату
         assertThat(actualOutput, hasSize(expectedOutput.size()));
@@ -185,7 +187,13 @@ class MainTest {
         );
     }
 
-
+    // Параметризований тест з використанням ValueSource
+    @ParameterizedTest
+    @ValueSource(strings = {"abc", "def", "ghi"})
+    void testValueSource(String value) {
+        // Перевірка, що значення міститься в списку заданих рядків
+        assertThat(value, anyOf(is("abc"), is("def"), is("ghi")));
+    }
 
 
 }
